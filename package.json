@@ -1,0 +1,15 @@
+{
+  "name": "com.josh.spline-importer",
+  "version": "1.0.0",
+  "displayName": "Spline Importer",
+  "description": "Import and export splines between Blender and Unity",
+  "unity": "2022.1",
+  "dependencies": {
+    "com.unity.mathematics": "1.0.0",
+    "com.unity.splines": "1.0.0"
+   },
+  "author": {
+    "name": "Josh",
+    "url": "https://github.com/Josh4359"
+  }
+}
