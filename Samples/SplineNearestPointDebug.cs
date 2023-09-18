@@ -1,17 +1,20 @@
 using UnityEngine;
 
-public class SplineNearestPointDebug : MonoBehaviour
+namespace FrameJosh.SplineImporter.Samples
 {
-    [SerializeField] SplinePlus splinePlus;
-
-    [SerializeField] float cubeSize;
-
-    void OnDrawGizmos()
+    public class SplineNearestPointDebug : MonoBehaviour
     {
-        if (!splinePlus) return;
+        [SerializeField] SplinePlus splinePlus;
 
-        splinePlus.GetNearestPoint(transform.position, out Vector3 position, out _);
+        [SerializeField] float cubeSize;
 
-        Gizmos.DrawCube(position, Vector3.one * cubeSize);
+        void OnDrawGizmos()
+        {
+            if (!splinePlus) return;
+
+            splinePlus.GetNearestPoint(transform.position, out Vector3 position, out _);
+
+            Gizmos.DrawCube(position, Vector3.one * cubeSize);
+        }
     }
 }
