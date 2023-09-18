@@ -24,7 +24,7 @@ namespace FrameJosh.SplineImporter
 
         public void Evaluate(float anchor, float distance, out Vector3 position, out Quaternion rotation)
         {
-            float t = anchor + (distance / splineContainer.Spline.GetLength());
+            float t = anchor + (distance / splineContainer.CalculateLength());
 
             if (deformContainer)
                 DeformSpline(t, out position, out rotation);
@@ -227,6 +227,11 @@ namespace FrameJosh.SplineImporter
                     oldPosition = position;
                 }
             }
+        }
+
+        void Reset()
+        {
+            splineContainer = GetComponentInChildren<SplineContainer>();
         }
     }
 }
