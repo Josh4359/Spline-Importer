@@ -92,7 +92,7 @@ public class SplinePlus : MonoBehaviour
 
         Vector3 difference = position1 - position0;
 
-        rotation = Vector3.Dot(difference, Vector3.up) > 0
+        rotation = Mathf.Abs(Vector3.Dot(difference, Vector3.up)) > 0
             ? Quaternion.LookRotation(difference, Vector3.up)
             : Quaternion.FromToRotation(Vector3.forward, difference);
     }
@@ -111,7 +111,7 @@ public class SplinePlus : MonoBehaviour
 
         Vector3 difference = position1 - position0;
 
-        rotation = Vector3.Dot(difference, Vector3.up) > 0
+        rotation = Mathf.Abs(Vector3.Dot(difference, Vector3.up)) > 0
             ? Quaternion.LookRotation(difference, Vector3.up)
             : Quaternion.FromToRotation(Vector3.forward, difference);
     }
