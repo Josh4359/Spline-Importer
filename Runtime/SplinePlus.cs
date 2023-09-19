@@ -12,35 +12,25 @@ namespace FrameJosh.SplineImporter
 
         public float resolution = 1;
 
-        public void Evaluate(int splineIndex, float anchor, float distance, out float3 position, out quaternion rotation)
-        {
-            EvaluateSpline(splineContainer.Splines[splineIndex], deformContainer ? deformContainer.Spline : null, anchor, distance, resolution, out position, out rotation);
-
-            position = splineContainer.transform.TransformPoint(position);
-
-            rotation *= splineContainer.transform.rotation;
-        }
-
         public void Evaluate(int splineIndex, float anchor, float distance, out Vector3 position, out Quaternion rotation)
         {
-            Evaluate(splineIndex, anchor, distance, out float3 position1, out quaternion rotation1);
+            EvaluateSpline(splineContainer.Splines[splineIndex], deformContainer ? deformContainer.Spline : null, anchor, distance, resolution, out float3 position1, out float3 tangent, out float3 upVector);
 
-            position = position1;
+            position = splineContainer.transform.TransformPoint(position1);
 
-            rotation = rotation1;
+            rotation = splineContainer.transform.rotation
+                * Quaternion.LookRotation(tangent, upVector);
         }
 
-        public void GetNearestPoint(int splineIndex, float3 point, out float3 position, out quaternion rotation, out float t)
+        public void GetNearestPoint(int splineIndex, Vector3 point, out Vector3 position, out Quaternion rotation, out float t)
         {
-            rotation = quaternion.identity;
-
             if (deformContainer)
             {
                 SplineUtility.GetNearestPoint(deformContainer.Spline, point, out _, out float t1);
 
                 deformContainer.Spline.Evaluate(t1, out float3 nearest, out float3 tangent, out float3 upVector);
 
-                float3 difference = point - nearest;
+                float3 difference = (float3)point - nearest;
 
                 float3x3 matrix = new()
                 {
@@ -57,48 +47,39 @@ namespace FrameJosh.SplineImporter
 
                 point = new float3(distance, 0, 0) + offset;
 
-                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out position, out t);
+                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out _, out t);
 
-                DeformSpline(splineContainer.Spline, deformContainer.Spline, t, resolution, out position, out rotation);
+                DeformSpline(splineContainer.Spline, deformContainer.Spline, t, resolution, out float3 position1, out float3 tangent1, out float3 upVector1);
+
+                position = position1;
+
+                rotation = Quaternion.LookRotation(tangent1, upVector1);
             }
             else
             {
-                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out position, out t);
+                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out float3 position1, out t);
+
+                position = position1;
 
                 SplineUtility.Evaluate(splineContainer.Splines[splineIndex], t, out _, out float3 tangent, out float3 upVector);
 
-                rotation = quaternion.LookRotationSafe(tangent, upVector);
+                rotation = Quaternion.LookRotation(tangent, upVector);
             }
 
             t = math.clamp(t, 0, 1);
         }
 
-        public void GetNearestPoint(int splineIndex, Vector3 point, out Vector3 position, out Quaternion rotation, out float t)
-        {
-            GetNearestPoint(splineIndex, point, out float3 position1, out quaternion rotation1, out t);
-
-            position = position1;
-
-            rotation = rotation1;
-        }
-
-        static void EvaluateSpline(ISpline spline, ISpline deform, float anchor, float distance, float resolution, out float3 position, out quaternion rotation)
+        static void EvaluateSpline(ISpline spline, ISpline deform, float anchor, float distance, float resolution, out float3 position, out float3 tangent, out float3 upVector)
         {
             float t = anchor + (distance / spline.GetLength());
 
             if (deform != null)
-                DeformSpline(spline, deform, t, resolution, out position, out rotation);
+                DeformSpline(spline, deform, t, resolution, out position, out tangent, out upVector);
             else
-            {
-                spline.Evaluate(t, out float3 position1, out float3 tangent, out float3 upVector);
-
-                position = position1;
-
-                rotation = quaternion.LookRotation(tangent, upVector);
-            }
+                spline.Evaluate(t, out position, out tangent, out upVector);
         }
 
-        static void DeformSpline(ISpline spline, ISpline deform, float t, float resolution, out float3 position, out quaternion rotation)
+        static void DeformSpline(ISpline spline, ISpline deform, float t, float resolution, out float3 position, out float3 tangent, out float3 upVector)
         {
             float resolutionScale = math.ceil(spline.GetLength() * resolution);
 
@@ -116,9 +97,9 @@ namespace FrameJosh.SplineImporter
 
             float3 point1 = EvaluatePoint(deform, position3);
 
-            float3 difference = point1 - point0;
+            tangent = point1 - point0;
 
-            rotation = quaternion.LookRotationSafe(difference, math.up());
+            upVector = math.up();
         }
 
         static float3 EvaluatePoint(ISpline deform, float3 point)
@@ -145,7 +126,7 @@ namespace FrameJosh.SplineImporter
 
             for (int i = 0; i < splineContainer.Splines.Count; i++)
             {
-                Evaluate(0, 0, 0, out float3 position, out _);
+                Evaluate(0, 0, 0, out Vector3 position, out _);
 
                 float3 oldPosition = position;
 
