@@ -62,7 +62,13 @@ namespace FrameJosh.SplineImporter
                 DeformSpline(splineContainer.Spline, deformContainer.Spline, t, resolution, out position, out rotation);
             }
             else
+            {
                 SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out position, out t);
+
+                SplineUtility.Evaluate(splineContainer.Splines[splineIndex], t, out _, out float3 tangent, out float3 upVector);
+
+                rotation = quaternion.LookRotationSafe(tangent, upVector);
+            }
 
             t = math.clamp(t, 0, 1);
         }
