@@ -864,6 +864,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splinePlus: {fileID: 1797524873}
   cubeSize: 0.5
+  matrixSize: 1
 --- !u!4 &1220459428
 Transform:
   m_ObjectHideFlags: 0
@@ -872,7 +873,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1220459424}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 0, z: -5}
+  m_LocalPosition: {x: 2, y: 0, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
