@@ -12,7 +12,7 @@ namespace FrameJosh.SplineImporter
 
         public int resolution = 1;
 
-        public void Evaluate(int splineIndex, float anchor, float distance, out Vector3 position, out Quaternion rotation)
+        public void Evaluate(int splineIndex, float anchor, float distance, out float3 position, out quaternion rotation)
         {
             float t = anchor + (distance / splineContainer.Spline.GetLength());
 
@@ -22,7 +22,7 @@ namespace FrameJosh.SplineImporter
                 EvaluateSpline(splineIndex, t, out position, out rotation);
         }
 
-        public void Evaluate(float anchor, float distance, out Vector3 position, out Quaternion rotation)
+        public void Evaluate(float anchor, float distance, out float3 position, out quaternion rotation)
         {
             float t = anchor + (distance / splineContainer.CalculateLength());
 
@@ -32,15 +32,15 @@ namespace FrameJosh.SplineImporter
                 EvaluateSpline(t, out position, out rotation);
         }
 
-        public void GetNearestPoint(int splineIndex, Vector3 point, out Vector3 position, out Quaternion rotation, out float t)
+        public void GetNearestPoint(int splineIndex, float3 point, out float3 position, out quaternion rotation, out float t)
         {
-            position = Vector3.zero;
+            position = float3.zero;
 
-            rotation = Quaternion.identity;
+            rotation = quaternion.identity;
 
             t = 0;
 
-            float nearestDistance = Mathf.Infinity;
+            float nearestDistance = float.PositiveInfinity;
 
             for (int i = 0; i < splineContainer.Splines.Count; i++)
             {
@@ -48,9 +48,9 @@ namespace FrameJosh.SplineImporter
 
                 for (float j = 0; j <= resolutionScale; j++)
                 {
-                    Evaluate(i, j / resolutionScale, 0, out Vector3 thisPosition, out Quaternion thisRotation);
+                    Evaluate(i, j / resolutionScale, 0, out float3 thisPosition, out quaternion thisRotation);
 
-                    float thisDistance = Vector3.Distance(point, thisPosition);
+                    float thisDistance = math.distance(point, thisPosition);
 
                     if (thisDistance < nearestDistance)
                     {
@@ -66,23 +66,23 @@ namespace FrameJosh.SplineImporter
             }
         }
 
-        public void GetNearestPoint(Vector3 point, out Vector3 position, out Quaternion rotation)
+        public void GetNearestPoint(float3 point, out float3 position, out quaternion rotation)
         {
-            position = Vector3.zero;
+            position = float3.zero;
 
-            rotation = Quaternion.identity;
+            rotation = quaternion.identity;
 
-            float nearestDistance = Mathf.Infinity;
+            float nearestDistance = float.PositiveInfinity;
 
             for (int i = 0; i < splineContainer.Splines.Count; i++)
             {
-                int resolutionScale = Mathf.CeilToInt(splineContainer.Splines[i].GetLength()) * resolution;
+                int resolutionScale = (int)math.ceil(splineContainer.Splines[i].GetLength()) * resolution;
 
                 for (float j = 0; j <= resolutionScale; j++)
                 {
-                    Evaluate(i, j / resolutionScale, 0, out Vector3 thisPosition, out Quaternion thisRotation);
+                    Evaluate(i, j / resolutionScale, 0, out float3 thisPosition, out quaternion thisRotation);
 
-                    float thisDistance = Vector3.Distance(point, thisPosition);
+                    float thisDistance = math.distance(point, thisPosition);
 
                     if (thisDistance < nearestDistance)
                     {
@@ -96,92 +96,82 @@ namespace FrameJosh.SplineImporter
             }
         }
 
-        void EvaluateSpline(int splineIndex, float t, out Vector3 position, out Quaternion rotation)
+        void EvaluateSpline(int splineIndex, float t, out float3 position, out quaternion rotation)
         {
             ScaledEvaluate(splineContainer, splineIndex, t, out float3 position1, out float3 tangent, out float3 upVector);
 
             position = position1;
 
-            rotation = Quaternion.LookRotation(tangent, upVector);
+            rotation = quaternion.LookRotation(tangent, upVector);
         }
 
-        void EvaluateSpline(float t, out Vector3 position, out Quaternion rotation)
+        void EvaluateSpline(float t, out float3 position, out quaternion rotation)
         {
             splineContainer.Evaluate(t, out float3 position1, out float3 tangent, out float3 upVector);
 
             position = position1;
 
-            rotation = Quaternion.LookRotation(tangent, upVector);
+            rotation = quaternion.LookRotation(tangent, upVector);
         }
 
-        void DeformSpline(int splineIndex, float t, out Vector3 position, out Quaternion rotation)
+        void DeformSpline(int splineIndex, float t, out float3 position, out quaternion rotation)
         {
-            int resolutionScale = Mathf.CeilToInt(splineContainer.Splines[splineIndex].GetLength()) * resolution;
+            int resolutionScale = (int)math.ceil(splineContainer.Splines[splineIndex].GetLength()) * resolution;
 
             position = EvaluatePoint(splineIndex, t);
 
-            float t1 = Mathf.Clamp(t, 0, 1 - (1 / (float)resolutionScale));
+            float t1 = math.clamp(t, 0, 1 - (1 / (float)resolutionScale));
 
-            Vector3 position0 = EvaluatePoint(splineIndex, t1);
+            float3 position0 = EvaluatePoint(splineIndex, t1);
 
-            Vector3 position1 = EvaluatePoint(splineIndex, t1 + (1 / (float)resolutionScale));
+            float3 position1 = EvaluatePoint(splineIndex, t1 + (1 / (float)resolutionScale));
 
-            Vector3 difference = position1 - position0;
+            float3 difference = position1 - position0;
 
-            rotation = Mathf.Abs(Vector3.Dot(difference, Vector3.up)) > 0
-                ? Quaternion.LookRotation(difference, Vector3.up)
-                : Quaternion.FromToRotation(Vector3.forward, difference);
+            rotation = quaternion.LookRotationSafe(difference, math.up());
         }
 
-        void DeformSpline(float t, out Vector3 position, out Quaternion rotation)
+        void DeformSpline(float t, out float3 position, out quaternion rotation)
         {
-            int resolutionScale = Mathf.CeilToInt(splineContainer.CalculateLength()) * resolution;
+            int resolutionScale = (int)math.ceil(splineContainer.CalculateLength()) * resolution;
 
             position = EvaluatePoint(t);
 
-            float t1 = Mathf.Clamp(t, 0, 1 - (1 / (float)resolutionScale));
+            float t1 = math.clamp(t, 0, 1 - (1 / (float)resolutionScale));
 
-            Vector3 position0 = EvaluatePoint(t1);
+            float3 position0 = EvaluatePoint(t1);
 
-            Vector3 position1 = EvaluatePoint(t1 + (1 / (float)resolutionScale));
+            float3 position1 = EvaluatePoint(t1 + (1 / (float)resolutionScale));
 
-            Vector3 difference = position1 - position0;
+            float3 difference = position1 - position0;
 
-            rotation = Mathf.Abs(Vector3.Dot(difference, Vector3.up)) > 0
-                ? Quaternion.LookRotation(difference, Vector3.up)
-                : Quaternion.FromToRotation(Vector3.forward, difference);
+            rotation = quaternion.LookRotationSafe(difference, math.up());
         }
 
-        Vector3 EvaluatePoint(int splineIndex, float t)
+        float3 EvaluatePoint(int splineIndex, float t)
         {
             ScaledEvaluate(splineContainer, splineIndex, t, out float3 position, out _, out _);
 
             ScaledEvaluate(deformContainer, 0, position.x / deformContainer.Spline.GetLength(), out float3 deformPosition, out float3 deformTangent, out float3 deformUpVector);
 
-            float3x3 deformMatrix = new()
-            {
-                c0 = (float3)Vector3.Normalize(Vector3.Cross(deformTangent, deformUpVector)),
-                c1 = (float3)Vector3.Normalize(deformUpVector),
-                c2 = (float3)Vector3.Normalize(deformTangent)
-            };
+            float3 right = math.normalize(math.cross(deformTangent, deformUpVector));
 
-            return deformPosition + (deformMatrix.c0 * position.z) + (deformMatrix.c1 * position.y);
+            float3 up = math.normalize(deformUpVector);
+
+            return deformPosition + (right * position.z) + (up * position.y);
         }
 
-        Vector3 EvaluatePoint(float t)
+        float3 EvaluatePoint(float t)
         {
             splineContainer.Evaluate(t, out float3 position, out _, out _);
 
             ScaledEvaluate(deformContainer, 0, position.x / deformContainer.Spline.GetLength(), out float3 deformPosition, out float3 deformTangent, out float3 deformUpVector);
 
-            float3x3 deformMatrix = new()
-            {
-                c0 = (float3)Vector3.Normalize(Vector3.Cross(deformTangent, deformUpVector)),
-                c1 = (float3)Vector3.Normalize(deformUpVector),
-                c2 = (float3)Vector3.Normalize(deformTangent)
-            };
+            float3 right = math.normalize(math.cross(deformTangent, deformUpVector));
 
-            return deformPosition + (deformMatrix.c0 * position.z) + (deformMatrix.c1 * position.y);
+            float3 up = math.normalize(deformUpVector);
+
+            return deformPosition + (right * position.z) + (up * position.y);
         }
 
         void ScaledEvaluate(SplineContainer splineContainer, int splineIndex, float t, out float3 position, out float3 tangent, out float3 upVector)
@@ -212,11 +202,11 @@ namespace FrameJosh.SplineImporter
 
             for (int i = 0; i < splineContainer.Splines.Count; i++)
             {
-                Evaluate(i, 0, 0, out Vector3 position, out _);
+                Evaluate(i, 0, 0, out float3 position, out _);
 
-                Vector3 oldPosition = position;
+                float3 oldPosition = position;
 
-                int gizmoResolution = Mathf.CeilToInt(splineContainer.Splines[i].GetLength());
+                int gizmoResolution = (int)math.ceil(splineContainer.Splines[i].GetLength());
 
                 for (float j = 1; j <= gizmoResolution; j++)
                 {
