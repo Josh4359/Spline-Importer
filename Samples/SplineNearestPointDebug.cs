@@ -13,7 +13,7 @@ namespace FrameJosh.SplineImporter.Samples
         {
             if (!splinePlus) return;
 
-            splinePlus.GetNearestPoint(transform.position, out float3 position, out _);
+            splinePlus.GetNearestPoint(0, transform.position, out float3 position, out _, out _);
 
             Gizmos.DrawCube(position, Vector3.one * cubeSize);
         }
