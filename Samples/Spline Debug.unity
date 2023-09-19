@@ -413,7 +413,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 304474437}
-  m_LocalRotation: {x: 0, y: 0.905946, z: 0, w: -0.42339322}
+  m_LocalRotation: {x: 0, y: 0.90936726, z: 0, w: -0.41599432}
   m_LocalPosition: {x: 2.3040967, y: 0, z: -2.9640856}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -911,7 +911,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineContainer: {fileID: 52903582}
   deformContainer: {fileID: 1024458827}
-  resolution: 1
+  resolution: 4
 --- !u!4 &1797524874
 Transform:
   m_ObjectHideFlags: 0

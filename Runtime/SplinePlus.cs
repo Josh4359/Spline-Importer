@@ -53,22 +53,18 @@ namespace FrameJosh.SplineImporter
                     math.dot(difference, matrix.c1),
                     -math.dot(difference, matrix.c0));
 
-                point = new float3(t1 * deformContainer.Spline.GetLength(), 0, 0) + offset;
+                float distance = math.clamp(t1, 0, 1) * deformContainer.Spline.GetLength();
+
+                point = new float3(distance, 0, 0) + offset;
 
                 SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out position, out t);
 
-                position = EvaluatePoint(deformContainer.Spline, position);
-
-                float3 point1 = new float3((t1 * deformContainer.Spline.GetLength()) + (1 / resolution), 0, 0) + offset;
-
-                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point1, out float3 position1, out _);
-
-                position1 = EvaluatePoint(deformContainer.Spline, position1);
-
-                rotation = quaternion.LookRotationSafe(position1 - position, Vector3.up);
+                DeformSpline(splineContainer.Spline, deformContainer.Spline, t, resolution, out position, out rotation);
             }
             else
                 SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out position, out t);
+
+            t = math.clamp(t, 0, 1);
         }
 
         public void GetNearestPoint(int splineIndex, Vector3 point, out Vector3 position, out Quaternion rotation, out float t)
@@ -127,7 +123,12 @@ namespace FrameJosh.SplineImporter
 
             float3 up = math.normalize(deformUpVector);
 
-            return deformPosition + (right * point.z) + (up * point.y);
+            float3 forward = math.normalize(deformTangent);
+
+            return deformPosition
+                + (forward * (math.max(point.x - deform.GetLength(), 0) + math.min(point.x, 0)))
+                + (right * point.z)
+                + (up * point.y);
         }
 
         void OnDrawGizmosSelected()
