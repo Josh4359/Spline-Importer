@@ -1,4 +1,3 @@
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace FrameJosh.SplineImporter.Samples
@@ -15,7 +14,7 @@ namespace FrameJosh.SplineImporter.Samples
         {
             if (!splinePlus) return;
 
-            splinePlus.GetNearestPoint(0, transform.position, out float3 position, out quaternion rotation, out _);
+            splinePlus.GetNearestPoint(0, transform.position, out Vector3 position, out Quaternion rotation, out _);
 
             Gizmos.DrawCube(position, Vector3.one * cubeSize);
 

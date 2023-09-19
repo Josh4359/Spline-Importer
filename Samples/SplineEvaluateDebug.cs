@@ -19,7 +19,7 @@ namespace FrameJosh.SplineImporter.Samples
         {
             if (!splinePlus) return;
 
-            splinePlus.Evaluate(0, anchor, distance, out float3 position, out quaternion rotation);
+            splinePlus.Evaluate(0, anchor, distance, out Vector3 position, out Quaternion rotation);
 
             transform.position = position;
 
