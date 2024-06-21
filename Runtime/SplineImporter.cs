@@ -189,6 +189,6 @@ namespace FrameJosh.SplineImporter
 
         public Spline[] splines = new Spline[0];
     }
+}
 
 #endif
-}

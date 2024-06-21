@@ -47,23 +47,25 @@ namespace FrameJosh.SplineImporter
 
                 point = new float3(distance, 0, 0) + offset;
 
-                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out _, out t);
+                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], splineContainer.transform.InverseTransformPoint(point), out _, out t);
 
                 DeformSpline(splineContainer.Spline, deformContainer.Spline, t, resolution, out float3 position1, out float3 tangent1, out float3 upVector1);
 
-                position = position1;
+                position = splineContainer.transform.TransformPoint(position1);
 
-                rotation = Quaternion.LookRotation(tangent1, upVector1);
+                rotation = splineContainer.transform.rotation
+                    * Quaternion.LookRotation(tangent1, upVector1);
             }
             else
             {
-                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], point, out float3 position1, out t);
-
-                position = position1;
+                SplineUtility.GetNearestPoint(splineContainer.Splines[splineIndex], splineContainer.transform.InverseTransformPoint(point), out float3 position1, out t);
+                
+                position = splineContainer.transform.TransformPoint(position1);
 
                 SplineUtility.Evaluate(splineContainer.Splines[splineIndex], t, out _, out float3 tangent, out float3 upVector);
 
-                rotation = Quaternion.LookRotation(tangent, upVector);
+                rotation = splineContainer.transform.rotation
+                    * Quaternion.LookRotation(tangent, upVector);
             }
 
             t = math.clamp(t, 0, 1);
